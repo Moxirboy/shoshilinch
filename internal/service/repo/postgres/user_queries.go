@@ -10,4 +10,7 @@ const (
 	('phone_number','first_name','last_name','password','role')
 	VALUES($1,$2,$3,$4,$5) returning id
 	`
+	Get=`
+	SELECT id,role password FROM 'user' where phone_number=$1
+	`
 )

@@ -23,6 +23,7 @@ type Config struct{
 	AppVersion string `env:"APP_VERSION"`
 	Logger Logger
 	Server Server
+	JWT	   JWT
 }
 type Postgres struct{
 	Host 	 string `env:"POSTGRES_HOST"`
@@ -47,7 +48,7 @@ type (
 	}
 	 JWT struct{
 		SecretKey string `env:"SECRET_KEY"`
+		SecretKeyExpireMinutes   uint16 `env:"JWT_ADMIN_SECRET_KEY_EXPIRE_MINUTES"`
 	}
-
 
 )

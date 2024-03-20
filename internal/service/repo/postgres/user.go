@@ -1,12 +1,12 @@
 package postgres
 
 import (
-	"database/sql"
-	"log"
-	"errors"
 	"context"
-	"shoshilinch/internal/service/repo"
+	"database/sql"
+	"errors"
+	"shoshilinch/pkg/log"
 	"shoshilinch/internal/models"
+	"shoshilinch/internal/service/repo"
 )
 
 
@@ -48,7 +48,7 @@ func (r *userRepository) GetExist(
 
 func (r *userRepository) Create(
 	ctx context.Context,
-	user models.User,
+	user *models.User,
 ) (string,error){
 	var id string
 	err:=r.db.QueryRowContext(
@@ -66,4 +66,27 @@ func (r *userRepository) Create(
 		return "",err
 	}
 	return id,nil
+}
+func(r *userRepository) Get(
+	ctx context.Context,
+	phoneNumber string,
+) (string,string,string,error){
+	var password string
+	var id string
+	var role string
+	err:=r.db.QueryRowContext(
+		ctx,
+		Get,
+		phoneNumber,
+	).
+	Scan(
+		&id,
+		&role,
+		&password,
+	)
+	if err!=nil{
+		r.log.Info("postgres.user.Get error: ",err)
+		return "","","",err
+	}
+	return id,role,password,nil
 }

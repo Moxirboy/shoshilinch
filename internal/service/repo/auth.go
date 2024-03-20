@@ -37,4 +37,8 @@ type AuthRepository interface {
 		ctx context.Context,
 		
 	)error
+	Delete(
+		ctx context.Context,
+		token string,
+	) error
 }

@@ -17,3 +17,14 @@ type User struct {
 	Role   		Role
 }
 
+const (
+	ErrUserNotFound=Err("no such user")
+	ErrPasswordNotMatch=Err("password is incorrect")
+	ErrClassNotFound=Err("no such class")
+)
+
+type Err string
+
+func (e Err) Error() string {
+	return string(e)
+}

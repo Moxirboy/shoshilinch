@@ -6,14 +6,15 @@ import (
 )
 
 
-func ReqToModel(
-	req *dto.SignUp,
+
+func FromreqToTeacherModel(
+	req *dto.CreateTeacher,
 ) *models.User{
 	return &models.User{
 		FirstName: req.Firstname,
 		LastName: req.Lastname,
 		PhoneNumber: req.PhoneNumber,
-		Password: req.Password,
-		Role: "student",
+		Password: req.PhoneNumber,
+		Role: "teacher",
 	}
 }
