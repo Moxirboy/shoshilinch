@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"github.com/jmoiron/sqlx"
 	"database/sql"
 	"shoshilinch/internal/models"
 	"shoshilinch/internal/service/repo"
@@ -9,12 +10,12 @@ import (
 )
 
 type choiceRepository struct {
-	db  *sql.DB
+	db  *sqlx.DB
 	log log.Logger
 }
 
 func NewChoiceRepository(
-	db *sql.DB,
+	db *sqlx.DB,
 	log log.Logger,
 ) repo.ChoiceRepository {
 	return &choiceRepository{
@@ -23,10 +24,11 @@ func NewChoiceRepository(
 	}
 }
 
-func (r *choiceRepository) Create(
+func (r *choiceRepository) CreateChoice(
 	ctx context.Context,
 	test []*models.Tests,
 ) error {
+	r.log.Info("shuyoda")
 	tx, err := r.db.BeginTx(
 		context.Background(),
 		&sql.TxOptions{
@@ -39,17 +41,28 @@ func (r *choiceRepository) Create(
 	}
 	for i, Question := range test {
 		for j, choice := range Question.Choices {
-			err := tx.QueryRowContext(
+			_,err := tx.ExecContext(
 				ctx,
 				CreateChoice,
 				Question.Test.Id,
 				choice.Text,
 				choice.IsTrue,
-			).
-				Scan(
-					&test[i].Choices[j].Id,
-				)
+			)
 			if err != nil {
+				r.log.Info(err)
+				_ = tx.Rollback()
+				return err
+			}
+			err=tx.QueryRowContext(
+				ctx,
+				GetChoice,
+				choice.Text,
+			).
+			Scan(
+				&test[i].Choices[j].Id,
+			)
+			if err != nil {
+				r.log.Info(err)
 				_ = tx.Rollback()
 				return err
 			}

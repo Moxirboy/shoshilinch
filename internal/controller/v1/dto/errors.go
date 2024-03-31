@@ -1,6 +1,6 @@
 package dto
 
 type InvalidParams struct {
-	Name   string
-	Reason string
+	Name   string `json:"name"`
+	Reason string`json:"reason"`
 }

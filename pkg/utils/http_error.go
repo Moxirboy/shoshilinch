@@ -28,6 +28,7 @@ var (
 	ErrInvalidField      = errors.New("invelid field")
 	ErrAlreadyExist      = errors.New("already exist")
 	ErrClientAlreadyUsed = errors.New("clientID: this client already used")
+	
 )
 
 func SendResponse(

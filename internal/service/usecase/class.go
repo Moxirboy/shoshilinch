@@ -39,3 +39,32 @@ func (uc *classUsecase) GetAll(
 		id,
 	)
 }
+
+func (uc *classUsecase) Get(
+	ctx context.Context,
+	id string,
+) (string,error){
+	return uc.repo.Get(
+		ctx,
+		id,
+	)
+}
+func (uc *classUsecase) GetClass(
+	ctx context.Context,
+	name string,
+) (string,error){
+	return uc.repo.GetId(
+		ctx,
+		name,
+	)
+}
+
+func (uc *classUsecase) GetTeacherIdbyId(
+	ctx context.Context,
+	id string,
+) (string,error){
+	return uc.repo.GetTeacherIdbyId(
+		ctx,
+		id,
+	)
+}

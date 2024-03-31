@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        .input-group {
+    margin-bottom: 15px;
+    padding-right: 1.5em;
+  }
+  
+  input[type='text'],
+  input[type='password'] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    outline: none;
+  }
+
+  header{
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+  /* Basic styling for the table */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+th, td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #f2f2f2;
+}
+
+/* Hover effect for table rows */
+tr:hover {
+    background-color: #f5f5f5;
+}
+
+    </style>
+    <title>Admin</title>
+</head>
+<body>
+    <div class="teacher-container">
+        <div class="teacher-box">
+            <div class="header"><h2>
+                Teacher Create
+            </h2></div>
+            <form id="teacher-form">
+                <div class="input-group">
+                    <input id="first-name" type="text" name="first-name" placeholder="First name" required>
+                </div>
+                <div class="input-group">
+                    <input id="last-name" type="text" name="last_number" placeholder="Last name" required>
+                </div>
+                <div class="input-group">
+                    <input id="phone-number" type="text" name="phone_number" placeholder="Phone Number" required>
+                </div>
+                <div class="input-group">
+                    <input id="password" type="text" name="password" placeholder="Password" required>
+                </div>
+                <button onclick="SubmitEvent(event)">Send</button>
+                <hr>
+                <div>
+                    <table id="teachers-table">
+                        <thead>
+                            <tr>
+                                <th>Id</th>
+                                <th>First Name</th>
+                                <th>Last Name</th>
+                                <th>Phone Number</th>
+                                <th>Password</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Table rows will be inserted here dynamically -->
+                        </tbody>
+                    </table>
+                    
+                </div>
+            </form>
+        </div>
+    </div>
+    <script >
+
+
+function SubmitEvent(event){
+    event.preventDefault(); // Prevent default form submission
+
+    const first_name = document.getElementById('first-name').value;
+    const last_name = document.getElementById('last-name').value;
+    const phone_number = document.getElementById('phone-number').value;
+    const password = document.getElementById('password').value;
+    const body = JSON.stringify({
+        first_name: first_name,
+        last_name: last_name,
+        phone_number: phone_number,
+        password: password
+    });
+    console.log(body)
+
+    fetch('/v1/admin/create_teacher',{
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: body
+    })
+    .then(response=>{
+        if(!response.ok){
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data=>{
+        console.log(data);
+    })
+    .catch(error=>{
+        console.error('Error:', error);
+    })
+}
+function GetTeachers(){
+    fetch('/v1/admin/teachers',{
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response=>{
+        if(!response.ok){
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data=>{
+        console.log(data);
+        const table = document.getElementById('teachers-table');
+        
+        data.forEach(teacher=>{
+            const row = table.insertRow(-1);
+            const cell1 = row.insertCell(0);
+            const cell2 = row.insertCell(1);
+            const cell3 = row.insertCell(2);
+            const cell4 = row.insertCell(3);
+            const cell5 = row.insertCell(4);
+            cell1.innerHTML = teacher.id;
+            cell2.innerHTML = teacher.first_name;
+            cell3.innerHTML = teacher.last_name;
+            cell4.innerHTML = teacher.phone_number;
+            cell5.innerHTML = teacher.password;
+        })
+    })
+    .catch(error=>{
+        console.error('Error:', error);
+    })
+}
+
+// Call the function when the page loads
+window.onload = function() {
+    GetTeachers();
+};
+    </script>
+</body>
+</html>

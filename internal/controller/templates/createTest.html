@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit Test Data</title>
+   <style>
+/* styles.css */
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+}
+
+form {
+    max-width: 600px;
+    margin: 0 auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+label {
+    font-weight: bold;
+}
+
+textarea,
+input[type="text"],
+input[type="checkbox"] {
+    width: calc(100% - 30px); /* Adjusted width to accommodate the checkbox */
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 16px;
+    display: inline-block; /* To allow inline display */
+    vertical-align: middle; /* Align vertically with checkbox */
+}
+
+input[type="checkbox"] {
+    width: auto; /* Reset width for checkbox */
+    margin-left: 10px; /* Adjust margin for spacing */
+}
+
+button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-right: 10px; /* Added margin for spacing between buttons */
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+/* Success message styling */
+.success-message {
+    display: none;
+    padding: 10px;
+    margin-top: 10px; /* Adjust margin from top */
+    background-color: #4CAF50; /* Green */
+    color: white;
+    border-radius: 4px;
+}
+
+.success-message.show {
+    display: block; /* Show the success message when class 'show' is added */
+}
+
+   </style><!-- Include external CSS file -->
+</head>
+<body>
+<h1>Submit Test Data</h1>
+<form id="testForm">
+    <input type="hidden" id="testId" name="test[id]" value="">
+    <input type="hidden" id="testUserId" name="test[user_id]" value="">
+    <label for="testQuestion">Test Question:</label><br>
+    <textarea id="testQuestion" name="test[question]" rows="4" cols="50"></textarea><br><br>
+
+    <fieldset id="choicesFieldset">
+        <legend>Choices</legend>
+        <div id="choicesContainer"></div>
+    </fieldset>
+
+    <button type="button" onclick="addChoice()">Add Choice</button>
+    <button type="button" onclick="goBack()">Back</button><br><br>
+
+    <button type="button" onclick="submitForm()">Submit</button>
+</form>
+<!-- Success message div -->
+<div id="successMessage" class="success-message"></div>
+
+<script>
+   function submitForm() {
+    var testId = document.getElementById('testId').value;
+    var testUserId = document.getElementById('testUserId').value;
+    var testQuestion = document.getElementById('testQuestion').value;
+
+    var choices = [];
+    var choiceInputs = document.querySelectorAll('[id^="choiceText"]');
+    var isTrueInputs = document.querySelectorAll('[id^="choiceIsTrue"]');
+    for (var i = 0; i < choiceInputs.length; i++) {
+        choices.push({
+            text: choiceInputs[i].value,
+            is_true: isTrueInputs[i].checked
+        });
+    }
+
+    var data = {
+        test: {
+            id: testId,
+            user_id: testUserId,
+            question: testQuestion
+        },
+        choices: choices
+    };
+
+    fetch('/v1/test/create', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            const successMessage = document.getElementById('successMessage');
+            successMessage.textContent = 'Test data submitted successfully'; // Update the success message
+            successMessage.classList.add('show'); // Show the success message
+            setTimeout(() => {
+                successMessage.classList.remove('show'); // Hide the success message after 3 seconds
+            }, 3000);
+            console.log('Form submitted successfully:', data);
+            // Reset form inputs after successful submission
+            document.getElementById("testForm").reset();
+        })
+        .catch(error => {
+            console.error('There was a problem with form submission:', error);
+            // You can handle errors here, such as displaying an error message to the user
+        });
+}
+
+function goBack() {
+    window.location.href = '/teacher';
+}
+
+function addChoice() {
+    var choicesContainer = document.getElementById('choicesContainer');
+    var choiceIndex = choicesContainer.children.length;
+
+    var choiceDiv = document.createElement('div');
+    choiceDiv.innerHTML = `
+        <label for="choiceText${choiceIndex}">Choice ${choiceIndex + 1}:</label>
+        <input type="text" id="choiceText${choiceIndex}" name="choices[${choiceIndex}][text]" required>
+        <input type="checkbox" id="choiceIsTrue${choiceIndex}" name="choices[${choiceIndex}][is_true]">
+        <label for="choiceIsTrue${choiceIndex}">Is True</label>
+        <br><br>
+    `;
+    choicesContainer.appendChild(choiceDiv);
+}
+
+</script>
+</body>
+</html>

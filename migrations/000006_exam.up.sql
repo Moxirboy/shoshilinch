@@ -1,5 +1,6 @@
-CREATE TABLE 'exam' {
+CREATE TABLE "exam" (
     'id' SERIAL PRIMARY KEY,
     'class_id' VARCHAR(40) NOT NULL,
-    'created_at' timestamp,
-}
+    'created_at' date,
+    'time ' TIMESTAMP
+);

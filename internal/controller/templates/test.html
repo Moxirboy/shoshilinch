@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <style>
+       /* Additions and modifications for improved styling */
+
+/* Overall layout */
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f9fa;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+/* Container for squares */
+#squares-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+/* Styling for each square */
+.square {
+    width: 40px;
+    height: 40px;
+    background-color: #6c757d;
+    margin: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: white;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+/* Quiz container */
+#quiz-container {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin: 20px auto;
+            max-width: 600px;
+        }
+
+/* Question styling */
+h1 {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+}
+
+/* Styling for choices */
+.choice {
+    margin-bottom: 10px;
+    display: block;
+}
+
+/* Styling for submit button */
+#submit-btn {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 20px;
+}
+
+#submit-btn:hover {
+    background-color: #0056b3;
+}
+
+/* Styling for result */
+#result {
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+.correct {
+    color: green;
+}
+
+.incorrect {
+    color: red;
+}
+
+.answered {
+    background-color: #ddd;
+}
+
+#correct-count {
+    font-weight: bold;
+}
+
+/* Footer */
+#footer {
+    text-align: center;
+    margin-top: 20px;
+}
+#timer {
+    font-size: 20px;
+    text-align: center;
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #007bff;
+    color: #fff;
+    border-radius: 5px;
+}
+
+
+    </style>
+    
+</head>
+<body>
+    <div id="timer"></div>
+    <div id="squares-container">
+        <!-- Script to generate 50 squares -->
+        <script>
+            // Function to create 50 square div elements
+            function createSquares() {
+                var container = document.getElementById("squares-container");
+                for (var i = 1; i <= 50; i++) {
+                    var square = document.createElement("div");
+                    square.className = "square";
+                    square.innerText = i;
+                    square.id = "square" + i; // Set id based on the number
+                    container.appendChild(square);
+                }
+            }
+    
+            // Call the function when the page loads
+            window.onload = createSquares;
+        </script>
+    </div>
+    
+    <div id="quiz-container">
+        <!-- Quiz will be loaded here -->
+    </div>
+    <button id="submit-btn">Submit</button>
+    
+    <script>
+        let answers = {}; // Object to hold the answers
+        let questionid=0;
+
+        // Function to get the correct count from local storage or initialize it
+        function getCorrectCount() {
+            return parseInt(localStorage.getItem('correctCount') || '0', 10);
+        }
+    
+        function getAnsweredCount() {
+            return parseInt(localStorage.getItem('answeredCount') || '0', 10);
+        }
+    
+        // Function to fetch and display the next question
+        function fetchNextQuestion() {
+            fetch('/v1/test/get_all')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('quiz-container').innerHTML = '';
+
+const container = document.getElementById('quiz-container');
+const questionElement = document.createElement('h1');
+questionElement.id = "questionName";
+questionElement.textContent = data.test.question;
+questionid = data.test.id;
+container.appendChild(questionElement);
+
+const choicesContainer = document.createElement('div');
+const shuffledChoices = shuffleArray(data.choices); // Shuffle the choices
+shuffledChoices.forEach((choice) => {
+    const choiceElement = document.createElement('label');
+    choiceElement.classList.add('choice');
+    choiceElement.innerHTML = `
+        <input type="radio" name="choice" value="${choice.id}"> ${choice.text}
+    `;
+    choicesContainer.appendChild(choiceElement);
+    console.log(choice);
+    if (choice.is_true) {
+        answers = choice.id;
+    }
+});
+
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+container.appendChild(choicesContainer);
+
+                })
+                .catch(error => console.error('Error fetching the quiz data:', error));
+        }
+    
+        document.addEventListener('DOMContentLoaded', function() {
+    
+            // Load the first question on page load
+            fetchNextQuestion();
+    
+            document.getElementById('submit-btn').addEventListener('click', function() {
+                const selectedChoice = document.querySelector('input[name="choice"]:checked');
+                if (!selectedChoice) {
+                    alert('Please select an answer.');
+                    return;
+                }
+
+                // Check the answer and display result
+                // Increment and save the correct count
+                console.log(selectedChoice.value)
+                if (answers===selectedChoice.value){
+
+                    const newCorrectCount = getCorrectCount() + 1;
+                    localStorage.setItem('correctCount', newCorrectCount.toString());
+
+                }
+                const selectedAnswerText = selectedChoice.nextSibling.textContent;
+
+                console.log(answers)
+
+                const correctAnswerText = document.querySelector(`input[value="${answers}"]`).nextSibling.textContent;
+                console.log(correctAnswerText)
+                const body = JSON.stringify({
+                    "Question": questionid,
+                    "Answer": correctAnswerText,
+                    "submitted": selectedAnswerText
+                })
+                Save(body)
+    
+                // Increment and save the total questions answered count
+                const totalQuestionsAnswered = getAnsweredCount() + 1;
+                localStorage.setItem('answeredCount', totalQuestionsAnswered.toString());
+                document.getElementById('square' + totalQuestionsAnswered).style.backgroundColor = answers===selectedChoice.value ? 'green' : 'green';
+                // Check if the user has answered 5 questions
+                if (totalQuestionsAnswered >= 50) {
+                    alert('Correct Answers: ' + localStorage.getItem('correctCount'));
+                    const  correct = JSON.stringify({
+                        "number": localStorage.getItem('correctCount'),
+                    })
+                    SaveAnswers(correct)
+                    localStorage.removeItem('answeredCount');
+                    localStorage.removeItem('correctCount');
+                    localStorage.removeItem('quizStartTime');
+                    window.location.href = '/student';
+                }
+    
+                // Fetch the next question after a short delay
+                setTimeout(fetchNextQuestion, 1000);
+            });
+        });
+        function Save(body){
+            fetch('/v1/test/save',{
+                method:'POST',
+                headers:{
+                    'Content-Type':'application/json'
+                },
+                body
+            })
+                .then(response=>{
+                    console.log(response)
+                    if (!response.ok){
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .catch(error=>{
+                console.log(error)
+            })
+
+        }
+
+        function SaveAnswers(body){
+            fetch('/v1/exam/score',{
+                method:'POST',
+                headers:{
+                    'Content-Type':'application/json'
+                },
+                body
+            })
+                .then(response=>{
+                    console.log(response)
+                    if (!response.ok){
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .catch(error=>{
+                    console.log(error)
+                
+            })
+        }
+        
+         // Function to start the countdown timer
+         function startTimer(savedTime) {
+            const timerElement = document.getElementById('timer');
+            let countdown = 50 * 60; // 5 minutes in seconds
+
+            // If savedTime exists, calculate remaining time
+            if (savedTime) {
+                const currentTime = Math.floor(new Date().getTime() / 1000);
+                const elapsedTime = currentTime - savedTime;
+                countdown -= elapsedTime;
+            }
+
+            // Update the timer every second
+            const timerInterval = setInterval(updateTimer, 1000);
+
+            function updateTimer() {
+                if (countdown <= 0) {
+                    // Change color to red when time is up
+                    // You can add further actions here when the time is up
+                    let count=localStorage.getItem('correctCount')
+                    if (count==null){
+                        count=0
+                    }
+                    alert('Correct Answers: ' + count);
+                    const  correct = JSON.stringify({
+                        "number": localStorage.getItem('correctCount'),
+                    })
+                    SaveAnswers(correct)
+                    localStorage.removeItem('answeredCount');
+                    localStorage.removeItem('correctCount');
+
+                    window.location.href = '/student';
+                } else if (countdown <= 25*60) {
+                    timerElement.style.color = 'orange'; // Change color to orange when less than 1 minute left
+                }else if(countdown <= 12.5*60){
+                    timerElement.style.color = 'red'; // Change color to red when less than 30 seconds left
+                }
+                const minutes = Math.floor(countdown / 60);
+                const seconds = countdown % 60;
+                timerElement.textContent = `Time Remaining: ${minutes}m ${seconds}s`;
+                countdown--;
+            }
+
+            // Initial update
+            updateTimer();
+        }
+
+        // Function to save the current time to localStorage
+        function saveCurrentTime() {
+            // Check if time has already been stored
+            if (!localStorage.getItem('quizStartTime')) {
+                const currentTime = Math.floor(new Date().getTime() / 1000);
+                localStorage.setItem('quizStartTime', currentTime);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if there is a saved start time
+            const savedTime = parseInt(localStorage.getItem('quizStartTime'));
+
+            // Start the timer with saved time
+            startTimer(savedTime);
+
+            // Save current time only if not already saved
+            saveCurrentTime();
+        });
+    </script>
+    
+    
+</body>
+</html>

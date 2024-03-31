@@ -8,8 +8,8 @@ import (
 
 
 type ChoiceRepository interface{
-	Create(
+	CreateChoice(
 		ctx context.Context,
 		test []*models.Tests,
-	)error
+	) error
 }

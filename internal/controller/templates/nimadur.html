@@ -1,0 +1,98 @@
+<script>
+    let answers = {}; // Object to hold the answers
+    let totalQuestionsAnswered = 0; // Variable to keep track of total questions answered
+
+    // Function to get the correct count from local storage or initialize it
+    function getCorrectCount() {
+        return parseInt(localStorage.getItem('correctCount') || '0', 10);
+    }
+
+    function getAnsweredCount() {
+        return parseInt(localStorage.getItem('answeredCount') || '0', 10);
+    }
+    
+
+    // Function to update the correct count in the UI
+    function updateCorrectCountUI() {
+        document.getElementById('correct-count').textContent = getCorrectCount();
+        
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        updateCorrectCountUI(); // Update the UI with the current count on load
+
+        function fetchNextQuestion() {
+            fetch('/v1/test/get_all')
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data)
+                    // Clear the previous question and choices
+                    document.getElementById('quiz-container').innerHTML = '';
+
+                    const container = document.getElementById('quiz-container');
+                    const questionElement = document.createElement('h1');
+                    questionElement.textContent = data.test.question;
+                    container.appendChild(questionElement);
+
+                    const choicesContainer = document.createElement('div');
+                    data.choices.forEach((choice) => {
+                        const choiceElement = document.createElement('label');
+                        choiceElement.classList.add('choice');
+                        choiceElement.innerHTML = `
+                            <input type="radio" name="choice" value="${choice.id}"> ${choice.text}
+                        `;
+                        choicesContainer.appendChild(choiceElement);
+
+                        // Store the correct answer in the 'answers' object
+                        answers[choice.id] = choice.is_true;
+                    });
+                    container.appendChild(choicesContainer);
+                })
+                .catch(error => console.error('Error fetching the quiz data:', error));
+        }
+
+        fetchNextQuestion(); // Load the first question on page load
+
+        document.getElementById('submit-btn').addEventListener('click', function() {
+            const selectedChoice = document.querySelector('input[name="choice"]:checked');
+            if (!selectedChoice) {
+                alert('Please select an answer.');
+                return;
+            }
+
+            // Check the answer and display result
+            const resultElement = document.getElementById('result');
+            if (answers[selectedChoice.value]) {
+                resultElement.textContent = 'Correct Answer!';
+                resultElement.className = 'correct';
+
+                // Increment and save the correct count
+                const newCorrectCount = getCorrectCount() + 1;
+                localStorage.setItem('correctCount', newCorrectCount.toString());
+                updateCorrectCountUI(); // Update the UI with the new count
+            } else {
+                resultElement.textContent = 'Incorrect Answer.';
+                resultElement.className = 'incorrect';
+            }
+            const totalQuestionsAnswered = getAnsweredCount() + 1;
+            localStorage.setItem('answeredCount', totalQuestionsAnswered.toString());
+
+            // Check if the user has answered 50 questions
+            if (totalQuestionsAnswered>=5){
+                alert('correct  answers.'+parseInt(localStorage.getItem('correctCount') || '0', 10));
+                localStorage.removeItem('answeredCount');
+                localStorage.removeItem('correctCount');
+                window.location.href = '/student';
+            }
+            if (totalQuestionsAnswered+1 >= 5) {
+                // Redirect to /student
+                document.getElementById('submit-btn').textContent="finish";
+                
+            } else {
+                // Fetch the next question after a short delay
+                setTimeout(fetchNextQuestion, 1000);
+            }
+            document.querySelector('input[name="choice"]:checked').checked = false;
+        });
+    });
+</script>
