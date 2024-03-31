@@ -6,8 +6,7 @@ import (
 
 // CustomClaims struct to hold user data
 type CustomClaims struct {
-	UserID  int    `json:"userId"`
+	UserID  string    `json:"userId"`
 	Role    string `json:"role"`
-	ClassID int    `json:"classId"`
 	jwt.StandardClaims
 }

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Creation</title>
+<style>
+    /* styles.css */
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.dropdown {
+    padding: 10px;
+    font-size: 16px;
+    width: calc(100% - 80px); /* Adjust width */
+    margin-bottom: 20px;
+}
+
+.button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.button:hover {
+    background-color: #0056b3;
+}
+
+.button:active {
+    transform: translateY(1px);
+}
+
+.success-message {
+    display: none;
+    padding: 10px;
+    margin-bottom: 20px;
+    background-color: #4CAF50; /* Green */
+    color: white;
+    border-radius: 4px;
+}
+
+.success-message.show {
+    display: block; /* Show the success message when class 'show' is added */
+}
+
+</style></head>
+<body>
+<div class="container">
+    <select id="myDropdown" class="dropdown"></select>
+    <div class="button-group">
+        <button type="button" onclick="goBack(event)" class="button back-button">Back</button>
+        <button onclick="createExam(event)" class="button create-button">Create</button>
+    </div>
+    <div id="successMessage" class="success-message"></div> <!-- Success message div -->
+</div>
+<script >
+const dropDown = document.getElementById('myDropdown');
+
+// Function to fetch and populate dropdown options
+function getAllClasses() {
+    fetch('/v1/class/get_all', {
+        method: "GET",
+        headers: {
+            'Content-Type': 'application/json'
+        },
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        data.data.forEach(item => {
+            const option = document.createElement('option');
+            option.value = item.name;
+            option.text = item.name;
+            dropDown.appendChild(option);
+        });
+    })
+    .catch(error => {
+        console.log('Error:', error);
+    });
+}
+
+// Function to create an exam
+function createExam(event) {
+    event.preventDefault();
+    const name = document.getElementById('myDropdown').value;
+    const body = JSON.stringify({ name: name });
+
+    fetch('/v1/exam/create', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: body
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not right');
+        }
+        return response.json();
+    })
+    .then(data => {
+        const successMessage = document.getElementById('successMessage');
+        successMessage.textContent = 'Exam created successfully';
+        successMessage.classList.add('show'); // Show the success message
+        setTimeout(() => {
+            successMessage.classList.remove('show'); // Hide the success message after 3 seconds
+        }, 3000);
+        document.getElementById('myDropdown').value = ''; // Clear dropdown selection
+    })
+    .catch(error => {
+        console.error('Error', error);
+    });
+}
+
+// Function to navigate back
+function goBack() {
+    window.location.href = '/teacher';
+}
+
+// Call the function to populate dropdown options on page load
+getAllClasses();
+
+
+</script>
+</body>
+</html>

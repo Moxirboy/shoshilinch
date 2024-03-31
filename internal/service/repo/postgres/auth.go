@@ -2,7 +2,7 @@ package postgres
 
 import (
 	"context"
-	"database/sql"
+	"github.com/jmoiron/sqlx"
 	"shoshilinch/internal/models"
 	"shoshilinch/internal/service/repo"
 	"shoshilinch/pkg/log"
@@ -11,12 +11,12 @@ import (
 
 
 type authRepository struct{
-	db *sql.DB
+	db *sqlx.DB
 	log log.Logger
 }
 
 func NewAuthRepository(
-	db *sql.DB,
+	db *sqlx.DB,
 	log log.Logger,
 ) repo.AuthRepository{
 	return &authRepository{

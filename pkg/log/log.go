@@ -1,10 +1,11 @@
 package log
 
 import (
-	"os"
-
+	"encoding/json"
+	"fmt"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"os"
 )
 
 // Logger methods interface
@@ -24,6 +25,7 @@ type Logger interface {
 	PanicF(template string, args ...interface{})
 	Fatal(args ...interface{})
 	Fatalf(template string, args ...interface{})
+	LogArgsToString(args interface{}) string
 }
 
 type logger struct {
@@ -93,6 +95,14 @@ func (l *apiLogger) Debug(args ...interface{}) {
 	l.sugarLogger.Debug(args...)
 }
 
+func (l *apiLogger) LogArgsToString(args interface{}) string {
+	jsonData, err := json.MarshalIndent(args, "", "    ")
+	if err != nil {
+		fmt.Println("Error marshalling JSON:", err)
+		return ""
+	}
+	return string(jsonData)
+}
 func (l *apiLogger) DebugF(template string, args ...interface{}) {
 	l.sugarLogger.Debugf(template, args...)
 }

@@ -15,6 +15,7 @@ func main() {
    )
    log:=log.NewLogger(config.AppName,config.AppVersion)
    log.InitLogger()
+
    log.InfoF(
     "AppVersion: %s, LogLevel: %s, Mode: %s",
     config.AppVersion,

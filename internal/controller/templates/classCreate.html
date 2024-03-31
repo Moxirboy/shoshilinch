@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Class Creation</title>
+<style>
+
+    /* styles.css */
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+form {
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    width: 300px;
+    text-align: center;
+    max-width: 80%; /* Limiting the width for larger screens */
+}
+
+label {
+    display: block;
+    margin-bottom: 10px; /* Increased margin for better separation */
+    color: #333;
+}
+
+input[type="text"],
+input[type="password"] {
+    width: calc(100% - 16px); /* Adjusted width for better alignment */
+    padding: 10px; /* Increased padding for better touch experience */
+    margin-bottom: 15px; /* Increased margin for better separation */
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+button {
+    width: 100%;
+    padding: 12px; /* Increased padding for better touch experience */
+    background-color: #007bff;
+    border: none;
+    color: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 10px; /* Added margin to separate buttons */
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+.back-button {
+    background-color: #ccc;
+    color: #333;
+}
+
+.back-button:hover {
+    background-color: #999;
+}
+
+/* Success message styling */
+.success-message {
+    display: none;
+    padding: 10px;
+    margin-top: 10px; /* Adjust margin from top */
+    background-color: #4CAF50; /* Green */
+    color: white;
+    border-radius: 4px;
+}
+
+.success-message.show {
+    display: block; /* Show the success message when class 'show' is added */
+}
+
+</style>
+</head>
+<body>
+<form id="createClassForm">
+    <label for="name">Nomi:</label>
+    <input type="text" id="name" placeholder="Nomi">
+    <label for="password">Parol:</label>
+    <input type="text" id="password" placeholder="Parol">
+    <button type="submit" onclick="createClass(event)">Yaratish</button>
+    <button onclick="goBack(event)" class="back-button">Orqaga</button>
+    <!-- Success message div -->
+    <div id="successMessage" class="success-message"></div>
+</form>
+<script>
+    function createClass(event) {
+    event.preventDefault();
+    const name = document.getElementById('name').value;
+    const password = document.getElementById('password').value;
+    const body = JSON.stringify({
+        name: name,
+        password: password,
+    });
+
+    fetch('/v1/class/create', {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: body
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        const successMessage = document.getElementById('successMessage');
+        successMessage.textContent = 'Class created successfully'; // Update the success message
+        successMessage.classList.add('show'); // Show the success message
+        setTimeout(() => {
+            successMessage.classList.remove('show'); // Hide the success message after 3 seconds
+        }, 3000);
+        document.getElementById('name').value = ''; // Clear input fields
+        document.getElementById('password').value = '';
+    })
+    .catch(error => {
+        console.error('error:', error);
+    });
+}
+
+function goBack(event) {
+    event.preventDefault();
+    window.location.href = '/teacher';
+}
+
+</script>
+</body>
+</html>

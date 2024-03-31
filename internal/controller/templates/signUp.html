@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up</title>
+  <link rel="stylesheet" type="text/css" href="static/css/signUp.css" >
+</head>
+<body>
+  <div class="signup-container">
+    <div class="form-container">
+      <h2>Sign Up</h2>
+      <form id="signup-form">
+        <div>
+          <input type="text" placeholder="sinf Nomi" id="class-name" required>
+        </div>
+        <div>
+          <input type="text"  placeholder="Ism" id="first-name" required>
+        </div>
+        <div>
+          <input type="text" placeholder="Familiya" id="last-name" required>
+        </div>
+        <div>
+            <input type="text" placeholder="Telefon raqam " id="phone-number" required>
+          </div>
+        <div>
+          <input type="password" placeholder="Password" id="password" required>
+        </div>
+        <div class="link">
+            <p>Registered? <a href="/">Login</a></p>
+          </div>
+        <button onclick="SubmitName(event)">Sign Up</button>
+      </form>
+    </div>
+  </div>
+  <script>
+    function SubmitName(event){
+      event.preventDefault(); // Prevent default form submission
+
+      const className = document.getElementById('class-name').value;
+      const firstName = document.getElementById('first-name').value;
+      const lastName = document.getElementById('last-name').value;
+      const phoneNumber = document.getElementById('phone-number').value;
+
+      const password = document.getElementById('password').value;
+      fetch('/v1/auth/sign-up', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          "class_name": className,
+          "first_name": firstName,
+          "last_name": lastName,
+          "phone_number": phoneNumber,
+          "password": password
+        })
+      })
+      .then(response => {
+        console.log(response)
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      } 
+      
+      return response.json();})
+      .then(data => {
+        console.log(data)
+        if (data.reason){
+          alert(data.reason)
+        }else if(data.token){
+          window.location.href = '/student';
+        }
+        
+      })
+      .catch(error=>{
+        console.log(error);
+      })
+    }
+  </script>
+</body>
+</html>

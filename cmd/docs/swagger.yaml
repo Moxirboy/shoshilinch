@@ -1,0 +1,51 @@
+
+definitions:
+  dto.SignUp:
+    type: object
+    properties:
+      Firstname:
+        type: string
+      Lastname:
+        type: string
+      ClassName:
+        type: string
+      Password:
+        type: string
+      
+    required:
+      - email
+      - password
+      - username
+    
+info:
+  contact: {}
+  description: "This is a sample server Petstore server.  You can find out more about Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).  For this sample, you can use the api key `special-key` to test the authorization filters."
+paths: 
+  /v1/auth/sign-up:
+    post:
+      consumes:
+        - application/json
+      operationId: SignUp
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: "#/definitions/dto.SignUp"
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "string"
+        "400":
+          description: "Invalid input"
+        "409":
+          description: "User already exists"
+        "500":
+          description: "Internal server error"
+      summary: "Sign up"
+      tags:
+        - "auth"
+swagger: "2.0"

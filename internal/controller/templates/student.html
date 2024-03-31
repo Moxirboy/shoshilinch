@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Check Response and Display Button</title>
+<style>
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #f0f0f0;
+  }
+
+  #responseArea {
+    padding: 20px;
+    background-color: white;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 255, 0.2), 0 6px 20px 0 rgba(0, 0, 255, 0.19);
+    border-radius: 8px;
+    text-align: center;
+    font-size: 16px;
+    width: 300px;
+    transition: box-shadow 0.3s ease-in-out;
+    position: relative; /* Ensure the button can be positioned inside this div */
+  }
+
+  #responseArea:hover {
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 255, 0.2), 0 12px 40px 0 rgba(0, 0, 255, 0.19);
+  }
+
+  .examDetails {
+    margin-bottom: 20px; /* Space before the button */
+    font-size: 14px; /* Smaller font size for the descriptive text */
+  }
+
+  #responseButton {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%; /* Make the button extend the full width of the container */
+    box-sizing: border-box; /* Ensures padding does not add to the width */
+  }
+
+  #responseButton:hover {
+    background-color: #0056b3;
+  }
+
+  /* New CSS for attempted exam message */
+  .attemptedMessage {
+    color: #333; /* Dark text for better readability */
+    font-weight: bold; /* Make it stand out */
+  }
+
+  .scoreHighlight {
+    display: block; /* Make the score appear on a new line for emphasis */
+    color: #d35400; /* A color that stands out */
+    font-size: 20px; /* Larger font size for the score */
+    margin-top: 10px; /* Some space above the score */
+  }
+</style>
+</head>
+<body>
+  <div id="responseArea">
+  <div class="examDetails">
+    This test lasts for 50 minutes and consists of 50 questions.
+  </div>
+  <button id="responseButton" style="display: none;" onclick="takeExam()">Click Me!</button>
+</div>
+  <script>
+    function hideResponseArea() {
+    document.getElementById('responseArea').style.display = 'none';
+  }
+    function takeExam() {
+      fetch("/v1/exam/attempt", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log(data);
+
+            window.location.href = '/student/test';
+
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+        });
+    }
+
+
+
+    // Function to make a GET request using fetch
+    function makeGetRequest(url) {
+      return fetch(url)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(data => {
+          console.log('Data:', data);
+          return data;
+        })
+        .catch(error => {
+          console.error('There was a problem with the fetch operation:', error);
+        });
+    }
+
+    // Function to check the response and display button
+    function checkResponseAndDisplayButton(response) {
+      var responseArea = document.getElementById('responseArea');
+      var responseButton = document.getElementById('responseButton');
+
+    //   // Display the response
+    //   responseArea.innerHTML = "Response: " + JSON.stringify(response);
+   
+
+    if (response.message == "attempted") {
+  responseButton.style.display = 'block';
+  responseArea.innerHTML = `<span class="attemptedMessage">You have already attempted the exam</span><span class="scoreHighlight">Score: ${response.score}</span>`;
+}
+if (response.message == "NO") {
+  responseButton.style.display = 'block';
+  responseArea.innerHTML = `<span class="attemptedMessage">There is no Exam</span>`;
+}
+      // Check if response is true
+      if (response.exist === true) {
+        responseButton.style.display = 'block';
+      } else {
+        responseButton.style.display = 'none';
+      }
+    }
+
+    // Make GET request when the page loads
+    window.onload = function () {
+      var url = '/v1/exam/get_exist'; // Replace 'your_endpoint_here' with your actual endpoint
+      makeGetRequest(url)
+        .then(checkResponseAndDisplayButton)
+        .catch(error => {
+          console.error('There was a problem:', error);
+        });
+    };
+  </script>
+</body>
+</html>
